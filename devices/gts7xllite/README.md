@@ -45,6 +45,14 @@ applies.
   (`pm8941_pwrkey`).
 - `zram-swap` is enabled, as on every device. The kernel builds zram in,
   because the rootfs carries no modules.
+- `rmtfs.service.d/10-gts7xllite.conf`: Wi-Fi's firmware service runs on the
+  modem DSP, which needs rmtfs. It serves copies of `modemst1`, `modemst2`
+  and `fsg` from `/var/lib/gts7xllite-efs`, read-only (`-r`: the modem's
+  writes stay in memory), and starts the modem (`-s`). The kernel does not
+  drive the UFS disk yet; the copies are the port's backups (they hold the
+  IMEI, so they are not here).
+- `NetworkManager/conf.d/gts7xllite.conf`: NetworkManager (what Denial's Wi-Fi
+  settings use) leaves `usb0`, the USB link to the workstation, alone.
 
 The output transform (`DSI-1,270`), the DRM device paths and Denial's
 settings (gamut correction off; with it off, landscape measured 60 fps)
