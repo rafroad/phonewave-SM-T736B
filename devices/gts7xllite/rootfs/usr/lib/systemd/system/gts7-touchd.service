@@ -1,0 +1,16 @@
+[Unit]
+Description=gts7xllite touchscreen (FocalTech FT8203 over SPI, fed to uinput)
+Before=getty@tty1.service
+StartLimitIntervalSec=120
+StartLimitBurst=6
+
+[Service]
+# Binds spidev to the touch chip, downloads the firmware into its RAM, reads touch frames, feeds /dev/uinput.
+ExecStart=/usr/local/sbin/gts7-touchd
+# Hold back the login that starts Denial until the input device exists (at most 20 s).
+ExecStartPost=/bin/sh -c 'i=0; while [ $i -lt 100 ]; do [ -e /dev/input/event0 ] && exit 0; i=$((i+1)); sleep 0.2; done; exit 0'
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
