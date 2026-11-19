@@ -50,7 +50,6 @@ out=$shared/out
 qemu=$shared/qemu/usr/bin/qemu-aarch64-static
 gnupg=$shared/gnupg
 root=$out/root
-noextract=$(grep -hv '^\s*\(#\|$\)' "$here/noextract" | tr '\n' ' ')
 
 verify_with() {  # KEYRING FILE: FILE.sig is a good signature by a key in KEYRING
   local home status
@@ -138,7 +137,7 @@ SigLevel = Required DatabaseOptional
 LocalFileSigLevel = Optional
 ParallelDownloads = 5
 DisableSandbox
-NoExtract = $noextract
+Include = $here/rootfs/etc/pacman.d/phonewave-noextract.conf
 
 $ours
 
@@ -275,13 +274,15 @@ inside() {
   # userspace mounts them here.
   install -d "$root/usr/lib/modules"
 
-  # The phone's pacman.conf: Arch Linux ARM's, with the Denial repositories:
-  # Denial itself, and denial-phone with what image/pack builds.
-  sed -i -e "/^#NoExtract/a NoExtract = $noextract" "$root/etc/pacman.conf"
-  printf '\n[denial]\nSigLevel = Required TrustedOnly\nServer = https://packages.denialwm.org/arch/$arch\n' \
-    >> "$root/etc/pacman.conf"
-  printf '\n[denial-phone]\nSigLevel = Required TrustedOnly\nServer = https://packages.denialwm.org/phone/$arch\n' \
-    >> "$root/etc/pacman.conf"
+  # The phone's pacman.conf: Arch Linux ARM's, with the Denial repositories
+  # (phonewave-system's /etc/pacman.d/denial.conf: Denial itself, and
+  # denial-phone with what image/pack builds) before Arch's, as on a phone
+  # made before, which phonewave-system's hook moves. The files that stay off
+  # a phone come the same way, from its /etc/pacman.d/phonewave-noextract.conf.
+  chroot "$root" /usr/lib/phonewave-system/pacman-repos > /dev/null
+  chroot "$root" /usr/lib/phonewave-system/pacman-noextract > /dev/null
+  rm -f "$root/etc/pacman.conf.before-denial-first" \
+    "$root/etc/pacman.conf.before-noextract-file"
   # Droidloom's repository as its install.sh writes it, which then accepts it.
   if [ -n "$droidloom" ]; then
     droidloom_repo > "$root/etc/pacman.d/droidloom.conf"

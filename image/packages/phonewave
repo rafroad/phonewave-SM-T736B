@@ -24,7 +24,6 @@ denial-app-calls
 denial-app-camera
 denial-app-messages
 denial-app-sensors
-denial-app-settings
 slot-success
 ufs-boot-lpm
 phonewave-gatekeeper
@@ -36,6 +35,9 @@ fingerprint-phonewave
 mesa-denial
 vulkan-freedreno-denial
 vulkan-mesa-implicit-layers-denial
+# FFmpeg whose V4L2 decoders hand Firefox dma-bufs (hardware video), in
+# place of Arch's.
+ffmpeg-denial
 # BlueZ that reads HID Report Maps past 512 octets (the OnePlus Pad 3
 # Keyboard), in place of Arch's.
 bluez-denial

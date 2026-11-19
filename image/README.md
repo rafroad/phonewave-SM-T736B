@@ -117,6 +117,42 @@ already is downloaded, not built. The image itself installs the packages
 `tools/phone-install HOST RECIPE...` puts a recipe's packages on a running
 phone.
 
+pacman.conf includes both from `/etc/pacman.d/denial.conf`, a
+phonewave-system file, before Arch Linux ARM's repositories:
+`usr/lib/phonewave-system/pacman-repos` puts the line there, from the image
+build and, on a phone made earlier, from a pacman hook on the
+phonewave-system update, which also drops the two sections the end of the
+file had then (the old file stays as `pacman.conf.before-denial-first`).
+pacman takes a package from the first repository that has its name, and
+looks for replacements in that order too, so this order is what lets ours
+take an Arch package's place.
+
+The files a package carries for the desktop only stay off a phone: pacman
+never unpacks what `/etc/pacman.d/phonewave-noextract.conf` lists, another
+phonewave-system file, which pacman.conf includes from its `[options]` and
+the image build reads too. `usr/lib/phonewave-system/pacman-noextract` puts
+that line there the same two ways and removes a listed file that is already
+on disk. On a phone made earlier the list of its day was a line in
+pacman.conf: that line goes (entries the user added stay; the old file stays
+as `pacman.conf.before-noextract-file`), and a file only the old list kept
+out is unpacked from pacman's package cache.
+
+A phone made from an image never needs a new image to keep up: it gets what
+later images add through `phonewave-image`, which depends on the lists in
+`packages/`.
+
+### Replacing an Arch package
+
+A package of ours that takes an Arch package's place (`ffmpeg-denial`,
+`bluez-denial`) has its own name and says `provides=(NAME=VERSION)`,
+`conflicts=(NAME)` and `replaces=(NAME)`, and goes in `packages/phonewave`.
+`phonewave-image` then depends on Arch's name, which ours provides: a phone
+that has Arch's package keeps a dependency that holds, and `pacman -Syu`
+swaps it for ours through `replaces`, without asking anything that could
+stop the update. A new image installs ours from the list. Ours follows
+Arch's version of the package: when Arch moves on, rebuild ours, or what
+needs the new version stops `pacman -Syu`.
+
 ## The kernel's modules
 
 `boot.img` holds the kernel and, at the page after it, a read-only erofs
@@ -369,9 +405,6 @@ the initramfs rescue, and keeps the phone's SSH host keys.
 
 ## Until Denial catches up
 
-- `noextract` keeps Denial's desktop Settings and Welcome off the phone, and
-  `rootfs/etc/skel/.config/denial/welcome` keeps Welcome from autostarting.
-  Both go once Settings is a package of its own.
 - `denial.service` sets `DENIAL_CPU_PLACEMENT=1`, `DENIAL_UI_CPU_MIN=512` and
   `DENIAL_RENDER_AHEAD=1`, the mobile shell's defaults in Denial's `dev`. They
   go once the denial package the image installs has them.

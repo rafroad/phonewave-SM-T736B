@@ -40,21 +40,21 @@ last.
 | USB host | ? | | |
 | Video out (USB-C) | works | 2026-11-09, devices-310, user | DisplayPort; the phone's screen goes off and on while the monitor stays lit |
 | Charging | works | devices-130, probe | The firmware charges; USB PD 9 V at about 3 A |
-| Battery | works | devices-130, probe | battmgr |
+| Battery | works | 2026-11-09, devices-317, probe | battmgr; reports what it holds when full (6670 of 7500 mAh), which Settings needs to show it |
 | Wi-Fi | works | 2026-11-09, devices-310, user | WCN7860, ath12k |
 | Bluetooth | works | 2026-11-09, devices-310, user | On the image radio-addr gives the controller its address |
 | Speakers | works | 2026-11-09, devices-310, user | Through the shared UCM profile; the amplifiers run 6 dB under stock, which has speaker protection in the audio DSP. Droidloom plays at full scale (fixed volume) |
-| Microphones | untested | 2026-11-06, devices-233, probe | On the image PipeWire shows the main microphone (AMIC1); not recorded yet |
+| Microphones | works | 2026-11-18, devices-393, Droidloom 0.1.0-44.1, user | The main microphone (AMIC1), in Linux and in Android apps; the decimators add 20 dB, since stock's level comes from ADSP calibration we do not run |
 | Headphone jack | not started | 2026-11-09, devices-310, probe | The codec reports the jack (Headphone Jack, Mic Jack, an input device); no playback or capture route in the UCM profile. Reixo0's patches 0068 and on |
 | Mobile data | works | 2026-11-09, devices-310, probe | 5G on Iliad, APN iliad; pings over the data bearer alone |
 | SMS | works | 2026-11-09, devices-310, user | dmail |
 | Calls | works | 2026-11-08, devices-304, user | Incoming over VoLTE: rings, wakes the screen and shows Calls over the lock screen; answered from it |
 | Call audio | works | 2026-11-08, devices-310, user | Both ways, on the speakers and the speaker microphone |
 | VoLTE | works | 2026-11-09, devices-310, user | dmail registers IMS on Iliad; calls ring and connect over it |
-| GNSS | not started | 2026-11-09, devices-310, probe | No GNSS device |
+| GNSS | works | 2026-11-18, devices-393, Droidloom 0.1.0-46.3, probe | No kernel GNSS device: the modem's engine through dmail `Location1`, as on the 12R; the modem takes only the privileged client type (3). Its first cold start, sessions of 3 minutes or less, heard 1–6 satellites and made no fix. After that, beside the 12R: fix 24 s after starting, ±14 m, 19–22 satellites tracked, 10–13 used. An Android app (Droidloom's GNSS HAL) got ±7.6 m with 71 signals listed, 32 heard, 12 used. Not tried outdoors or with GeoClue |
 | NFC | ? | | No NFC device on perpetua |
 | Camera | partial | 2026-10-28, devices-155, user | Raw frames through CAMSS at 30 fps; colour orders checked on a chart. braun finds all four cameras; the Camera app is its client, untuned. Main OV50E40 4096x3072 over three C-PHY trios, focus through its DW9785 (OIS off) (user); front OV16A1Q 2304x1728 binned (Quad Bayer) (user); ultrawide OV50D40 4096x3072, a lens chip in the app (user). Auxiliary OV02F10 1600x1200 streams, not in the app. Before devices-155 a switch from the ultrawide to the main camera gave no frame about half the time (user): the stopped CSIPHY stayed out of reset. Now 12 of 12 such switches open, and main to ultrawide 6 of 6 |
-| Video decode | not started | | No Iris for Kaanapali |
+| Video decode | works | 2026-11-18, devices-393, probe | Iris with the phone's own `vpu40_2v.mbn` in the tail: H.264, HEVC, VP9 and AV1 at 1080p, HEVC and AV1 at 4K, and 10-bit HEVC and AV1 decode bit-exact against software through GStreamer's v4l2 decoders, 8 to 19 times real time. Idle, the codec suspends |
 | Rotation | works | 2026-11-09, devices-310, probe | steinerd reports the accelerometer and gyroscope live |
 | Light and proximity | works | 2026-11-09, devices-310, probe | steinerd reports both live |
 | Compass and gyroscope | works | 2026-11-09, devices-310, probe | steinerd reports both live |
@@ -95,7 +95,7 @@ last.
 | Calls | works | 2026-10-21, user | Outgoing and incoming, falls back to 3G |
 | Call audio | works | 2026-10-21, devices-51, user | Not tried since the microphone regression |
 | VoLTE | not started | | |
-| GNSS | ? | | |
+| GNSS | partial | 2026-11-18, devices-363, Droidloom 0.1.0-46.3, probe | The modem's engine through dmail `Location1`, and GeoClue through dmail's NMEA socket (its demo client, with a test agent). By a window: warm fix in 5–21 s at ±100–280 m; with all assistance wiped and XTRA from dmail, 191 s at ±10 m on 11 satellites. Settings' Location page reads `Location1`. Android apps get positions through Droidloom's GNSS HAL (a test app's `gps` request, ±10 m, while dmail already had a fix; the broker took and released `Location1`). With dmail's `Satellites` and `Accuracies`, a test app's `GnssStatus` listener saw 62 signals, 36 heard, 15–16 used, L5 among them, with C/N0, elevation, azimuth and carrier frequency; fixes carry vertical and speed accuracy and `satellites=15` (Android shows satellite status only to foreground or exempted apps). Denial's GeoClue agent not tried on a phone |
 | NFC | ? | | |
 | Camera | partial | 2026-10-28, devices74 | IMX890 main, IMX355 ultrawide, S5K3P9 front; Camera app (user, 2026-10-22). No 50 MP mode. On braun: an IMX890 photo with `braunctl shot`; either camera reopens at once, and the S5K3P9 opens right after the IMX890, 6 out of 6, and the IMX890 right after the IMX355 or the S5K3P9, 12 out of 12. Before devices74 a reopen within a second of a close timed out in RPMh and stopped the phone: camss dropped its camera NoC votes while the CCI kept TITAN_TOP powered |
 | Video decode | works | 2026-10-28, devices-73, probe | Iris: H.264, HEVC and VP9 at 1080p decode bit-exact against software, 12 to 18 times real time. VP9 logs decode errors without losing frames. AV1 is listed, not tried |
@@ -182,7 +182,7 @@ last.
 | GNSS | ? | | |
 | NFC | none | | |
 | Camera | partial | 2026-11-11, devices-344, user, probe | Rear SmartSens C658 4160x3120 on CSIPHY4 and front D154 3264x2448 on CSIPHY5, RAW10 over four lanes. braun finds both and opens each 10 of 10 times; the Camera app shows both, untuned (user). Photos are landscape as the panel. Both send BGGR: as RGGB, orange came out blue on the rear and blue red on the front (user). Rear: text comes out upright and unmirrored; gain steps 1.5x to 6x within 4 %. Front: orientation and mirroring right (user). Not checked: rear gains of 8x and above. No focus: the rear lens actuator is not driven |
-| Video decode | not started | | No Iris for Kaanapali; the stock vendor firmware has APV |
+| Video decode | works | 2026-11-18, devices-392, probe | Iris (`/dev/video0`) with the tablet's own `vpu40_2v.mbn` in the tail: H.264, HEVC, VP9 and AV1 at 1080p, HEVC and AV1 at 4K, and 10-bit HEVC and AV1 decode bit-exact against software through GStreamer's v4l2 decoders (with `ffmpeg-denial` from `image/recipes` in place of Arch's ffmpeg, FFmpeg's v4l2m2m decoders do all of these bit-exact too, 10-bit included, and hand out dma-buf frames: Firefox 160 plays H.264 and HEVC, 8- and 10-bit, on Iris; VP9 and AV1 it gives to its bundled FFmpeg), 8 to 20 times real time. AV1 in MP4 through GStreamer loses its first frame: GStreamer hands the decoder the av1C box first; a raw OBU stream loses none. APV needs driver work. Idle, the codec suspends |
 | Rotation | works | 2026-11-11, devices-322, user | steinerd, with the tail's `steinerd/top` naming the sensor axis at the screen's top edge |
 | Light and proximity | works | 2026-11-11, devices-322, user | stk36c01; light tested by the user, proximity answers (probe) |
 | Compass and gyroscope | works | 2026-11-11, devices-322, probe | steinerd: bmi3x0 accelerometer and gyroscope, ak0991x magnetometer, bu52053nvx hall |
@@ -325,3 +325,46 @@ last.
 | Android apps | works | 2026-11-17, devices-71, user | Droidloom |
 | Pen | works | 2026-11-17, devices-71, user | The NT36536's pen; the 144 Hz pen mode is not in the panel's firmware |
 | Keyboard cover | works | 2026-11-17, devices-71, user | The pogo-pin keyboard; the top row mapped over Bluetooth |
+
+## oriole: Google Pixel 6 (gs101)
+
+| Feature | Status | Tested | Notes |
+| --- | --- | --- | --- |
+| Boot | works | 2026-11-18, perpetua 54b11399ccc0, user, probe | The shared image on `userdata`; `boot_b` carries the shared early userspace as its ramdisk (no init_boot partition), the modules' tail after it |
+| Display | works | 2026-11-16, oriole branch, user | exynosdrm takes over from the bootloader, 1080x2400 at 60 and 90 Hz |
+| Brightness | works | 2026-11-16, oriole branch, probe | Panel backlight 0-2047 |
+| Wake from screen off | ? | | Blanking works; the power key not tried |
+| GPU | works | 2026-11-16, oriole branch, user | Panfrost; Mali-G78 entry in mesa-denial |
+| Touch | works | 2026-11-16, oriole branch, user | STM FTS5 on SPI |
+| Keys | untested | | gpio-keys registers |
+| Haptics | not started | | cs40l2x |
+| Storage | works | 2026-11-16, oriole branch, probe | UFS |
+| USB device | works | 2026-11-17, oriole branch, probe | ECM networking |
+| USB host | not started | | |
+| Video out (USB-C) | ? | | |
+| Charging | partial | 2026-11-15, oriole branch, probe | Default USB 500 mA and USB-PD 9 V; the 9 V rate not measured |
+| Battery | works | 2026-11-15, oriole branch, probe | max17042 |
+| Wi-Fi | partial | 2026-11-17, oriole 55bb88f0, probe | BCM4389 on brcmfmac: WPA2 and WPA3 on 2.4 and 5 GHz, 80 to 170 Mbit/s; US only so far, no 6 GHz |
+| Bluetooth | not started | | |
+| Speakers | not started | | |
+| Microphones | not started | | |
+| Headphone jack | none | | |
+| Mobile data | not started | | |
+| SMS | not started | | |
+| Calls | not started | | |
+| Call audio | not started | | |
+| VoLTE | not started | | |
+| GNSS | not started | | |
+| NFC | not started | | |
+| Camera | not started | | |
+| Video decode | not started | | |
+| Rotation | not started | | |
+| Light and proximity | not started | | |
+| Compass and gyroscope | not started | | |
+| Fingerprint | not started | | |
+| Suspend | not started | | |
+| Cooling | works | 2026-11-16, oriole branch, probe | TMU zones for the CPU clusters and the GPU; throttling tried with emulated temperatures |
+| Denial | works | 2026-11-18, perpetua 54b11399ccc0, user | The image's setup, then the home screen; the CPUs at full speed with linux-perpetua#43 |
+| Native apps | partial | 2026-11-16, oriole branch, user | Settings and Welcome open; laggy |
+| Android apps | ? | | |
+| CPU frequency | works | 2026-11-15, oriole branch, probe | cpufreq-dt, schedutil |
